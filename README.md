@@ -45,17 +45,6 @@ After the visual-prompt prototype works, A leads the conventional pixel-prompt b
 - `configs/`: shared experiment configuration guidance.
 - `.gitignore`: excludes local data, feature caches, model weights, secrets, and temporary outputs.
 
-Use Overleaf with **pdfLaTeX** to compile the proposal. Update the member fields, verify citations and experimental commitments, and keep the repository URL in the proposal. Do not commit private student IDs or credentials.
-
-## First milestones
-
-1. Agree on member ownership and dataset protocols.
-2. Run a EuroSAT zero-shot pilot and check class ordering.
-3. Save shared few-shot sample lists and profile compute.
-4. Implement the required baselines before the visual-prompt extension.
-
-Dependency versions and runnable commands will be documented after the pilot has been tested. No benchmark scores are claimed yet.
-
 ## References
 
 1. Radford et al. (2021), [Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020).
