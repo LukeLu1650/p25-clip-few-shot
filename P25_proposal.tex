@@ -1,0 +1,159 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,array}
+\usepackage{enumitem,xcolor,geometry,fancyhdr,titlesec,parskip}
+\usepackage{hyperref}
+\geometry{margin=1in}
+\setlength{\headheight}{15pt}
+\definecolor{courseblue}{HTML}{002452}
+\definecolor{coursered}{HTML}{B90E31}
+\hypersetup{colorlinks=true,linkcolor=courseblue,citecolor=courseblue,urlcolor=coursered}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textcolor{courseblue}{\textbf{CISC 473 --- Deep Learning | Fall 2026}}}
+\fancyhead[R]{\small\textcolor{courseblue}{Project Proposal}}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\titleformat{\section}{\large\bfseries\color{courseblue}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{courseblue}}{}{0em}{}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% Overleaf: use pdfLaTeX. This is an English proposal draft.
+% Replace the identity fields below and review all proposed commitments.
+% A/B/C throughout the document refer to the three members listed here.
+\newcommand{\memberA}{[Student 1 Name]}
+\newcommand{\memberB}{[Student 2 Name]}
+\newcommand{\memberC}{[Student 3 Name]}
+\newcommand{\studentIDA}{[Student 1 ID]}
+\newcommand{\studentIDB}{[Student 2 ID]}
+\newcommand{\studentIDC}{[Student 3 ID]}
+
+\begin{document}
+{\centering
+  {\Large\textbf{CISC 473: Deep Learning --- Project Proposal}}\\[0.5em]
+  {\large\textit{P25: CLIP-Based Efficient Few-Shot Transfer\\
+  to Specialised Image Domains}}\\[0.4em]
+  \textbf{Focus: Text, Cache, and Regularized Visual Prompts}\\[0.5em]
+  \textbf{Group Members:}\\
+  \memberA\quad\studentIDA\quad (Project Lead; A)\\
+  \memberB\quad\studentIDB\quad (Research Lead; B)\\
+  \memberC\quad\studentIDC\quad (Engineering Lead; C)\\[0.3em]
+  \textbf{GitHub Repository:} \url{https://github.com/LukeLu1650/p25-clip-few-shot}\\[0.3em]
+  \textbf{Date:} \today\\[0.4em]
+  \rule{\linewidth}{0.4pt}\par
+}
+
+\section{Problem Statement and Motivation}
+
+Specialised image classification often requires labelled examples that are expensive to collect or annotate. Satellite land-use recognition, texture classification, and fine-grained flower recognition also involve visual patterns that differ from ordinary object photographs. A practical adaptation method should use limited target-domain labels effectively while keeping computational requirements manageable.
+
+CLIP aligns image and text representations and supports classification through natural-language class descriptions \cite{clip}. This allows a pretrained model to serve as a zero-shot baseline without target-task training. However, choosing an effective prompt and adapting to a specialised dataset remain important design decisions. Text-prompt learning and feature-cache methods provide alternative ways to use a small labelled training set \cite{coop,tip}. Their relative value should be evaluated under a consistent protocol rather than inferred from results obtained using different samples, backbones, or tuning budgets.
+
+We will compare these approaches on EuroSAT, DTD, and Oxford Flowers102. Our focus is the relationship between classification accuracy, stability across sampled training sets, and adaptation cost. For our extension, we will investigate a low-resolution, regularized pixel-space visual prompt on EuroSAT. The motivation is that restricting the number and magnitude of adjustable input parameters may help when only a few labelled examples are available. This is a hypothesis to test, not an assumed improvement.
+
+Our research questions are:
+\begin{enumerate}[nosep,leftmargin=*]
+  \item How do CoOp and Tip-Adapter compare with zero-shot CLIP as the number of labelled examples per class increases?
+  \item How sensitive are results to prompt length, initialization, text templates, and random sampling?
+  \item Can a restricted-capacity visual prompt improve accuracy or stability on EuroSAT at an acceptable adaptation cost?
+\end{enumerate}
+
+\section{Literature Survey}
+\subsection{Related Works}
+
+\paragraph{Radford et al., 2021, ICML: CLIP.}
+CLIP learns aligned image and text representations using natural-language supervision \cite{clip}. Its evaluation demonstrates zero-shot transfer across many recognition datasets using textual class descriptions. It supplies our common pretrained backbone and zero-shot baseline. We will study target-domain adaptation rather than reproduce CLIP pretraining.
+
+\paragraph{Zhou et al., 2022, IJCV: CoOp.}
+CoOp replaces manually specified text context with learnable continuous vectors while keeping the pretrained model fixed \cite{coop}. Its multi-dataset experiments demonstrate improved few-shot classification relative to hand-crafted prompts. We will reproduce this adaptation strategy and examine sensitivity to context length, initialization, and labelled-sample selection.
+
+\paragraph{Zhang et al., 2022, ECCV: Tip-Adapter.}
+Tip-Adapter constructs a key--value cache of labelled image features and combines cache-based predictions with CLIP scores \cite{tip}. Its original form avoids gradient-based adaptation and achieves competitive few-shot accuracy; a separate fine-tuned variant further updates the cache. We will use the original method as the required cache baseline, report tuning costs, and clearly distinguish it from Tip-Adapter-F.
+
+\paragraph{Jia et al., 2022, ECCV: Visual Prompt Tuning.}
+VPT adds trainable prompt tokens to visual Transformer input sequences while freezing the backbone \cite{vpt}. Its evaluations show that this can provide effective parameter-efficient adaptation across downstream tasks. VPT motivates visual-side adaptation, but our proposed implementation modifies image pixels rather than inserting tokens into Transformer layers.
+
+\paragraph{Bahng et al., 2022, arXiv: Pixel-Space Visual Prompting.}
+This work learns a shared image perturbation to adapt a frozen model, including CLIP \cite{vp}. It evaluates prompt designs such as patches and borders on datasets including EuroSAT, DTD, and Flowers102. We will use a published pixel-prompt design as a baseline for our extension. Applying visual prompting to EuroSAT alone is therefore not a new contribution.
+
+\subsection{Open Problem}
+
+Our specific question is whether restricting pixel-prompt capacity and magnitude improves the accuracy--stability trade-off under small label budgets. We will examine this through controlled comparisons with an existing pixel-prompt baseline. We have not established that the proposed combination is absent from prior work. Further literature review will refine its positioning; any novelty claim will be limited to what that review and our experiments support.
+
+\section{Proposed Methodology}
+\subsection{Baseline}
+
+All CLIP methods will use the same pretrained ViT-B/32 checkpoint. We will implement zero-shot CLIP, CoOp, and the original Tip-Adapter using the authors' released implementations where practical, recording versions and configurations. We will compare generic and domain-specific fixed text templates. An ImageNet-pretrained ResNet-50 will provide a supervised baseline through fine-tuning on the same few-shot training samples; updated layers and training budgets will be documented. EuroSAT will use RGB images, alongside DTD and Oxford Flowers102.
+
+\subsection{Proposed Extension}
+
+On EuroSAT, we will learn a shared RGB array $P$ of initial size $16\times16\times3$. After resizing to the input resolution, a bounded residual will be added to each image before CLIP normalization:
+\[
+ x' = \operatorname{clip}_{[0,1]}\bigl(x + \epsilon\tanh(U(P))\bigr),
+\]
+where $U$ denotes resizing and $\epsilon$ bounds the perturbation. Both CLIP encoders and the text template remain fixed. Only $P$ is optimized, using classification cross-entropy plus a penalty on residual magnitude. The same learned prompt is applied to every test image without knowing its label. Prompt resolution, the amplitude bound, and regularization will be selected using validation data. This explicit bounded formulation operationalizes our candidate design; it is not claimed as an established new algorithm.
+
+\subsection{Evaluation Plan}
+
+CoOp and Tip-Adapter will be evaluated at $k\in\{1,2,4,8,16\}$ labelled examples per class on all three datasets. The visual-prompt extension will use the same shot counts on EuroSAT. All methods will share fixed, disjoint train/validation/test partitions and identical training samples for each seed. We will document benchmark split protocols, including the chosen Flowers102 protocol, and publish sample lists. Additional validation labels will be counted separately, and the test set will not guide tuning.
+
+We will report top-1 accuracy as mean $\pm$ standard deviation across at least three independent runs for methods involving random sampling or training. We will measure trainable parameters and adaptation time on documented hardware, including feature extraction and tuning where applicable. Ablations will compare no visual prompt, an existing pixel-prompt baseline, and the proposed prompt with and without regularization. Sensitivity studies will vary one factor at a time in predefined representative settings. Confusion matrices and text-to-image retrieval examples will support failure analysis.
+
+\subsection{Candidate Contribution and Feasibility}
+
+The candidate contribution is a controlled analysis of prompt capacity and regularization under few-shot satellite classification, supported by a reproducible comparison of adaptation methods. Improvements are not guaranteed; negative findings and efficiency trade-offs will also be reported. This draft does not claim an already verified novel contribution for the optional bonus.
+
+We will profile a pilot before scheduling the full experiment grid. Fixed features will be cached where valid. Visual-prompt learning requires backpropagation through the frozen image encoder, so frozen parameters do not imply negligible compute. GPU resources will be used when available. We will reduce optional hyperparameter sweeps before considering changes to the required scope; material scope changes will be discussed with the instructor.
+
+\section{Project Timeline and Roles}
+
+A, B, and C denote the members listed on the first page. A will lead data protocols, zero-shot CLIP, ResNet-50, and integration. B will lead the literature survey, CoOp, and text-prompt sensitivity. C will lead Tip-Adapter, the visual-prompt prototype, and reproducibility tools. Once the prototype works, A will run the conventional visual-prompt baseline, B the low-resolution unregularized variant, and C the regularized variant using shared code. All members will contribute to analysis, writing, and presentation.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{@{}lYp{2.3cm}@{}}
+\toprule
+\textbf{Week} & \textbf{Tasks and deliverables} & \textbf{Responsible}\\
+\midrule
+1 & Literature review, repository setup, shared dataset and sampling protocol. & All; A coordinates\\
+2 & EuroSAT zero-shot pilot; runtime profiling; finalized proposal. \textbf{Proposal due.} & A: pilot; B: review; C: profiling\\
+3 & Zero-shot and ResNet-50 experiments; initial CoOp and cache pipelines. & A: baselines; B/C: pipelines\\
+4 & CoOp few-shot runs; Tip-Adapter runs; checks of shared evaluation. & B: CoOp; C: cache; A: checks\\
+5 & Continue three-dataset comparisons; implement visual-prompt prototype. & C: prototype; A/B: comparisons\\
+6 & Preliminary tables and EuroSAT extension results. \textbf{Midterm due.} & All\\
+7 & Text-prompt sensitivity and visual-prompt ablations using shared code. & B: text; A/B/C: visual variants\\
+8 & Complete repeated runs, efficiency measurements, and failure analysis. & All; A consolidates\\
+9 & Report, figures, peer review, and single-command reproducibility check. & All; C: reproduction\\
+10 & Final report, code release, and presentation. \textbf{Final due.} & All; A submits\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Contribution Declaration}
+These are planned contributions; later deliverables will reflect actual work.
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}p{2.8cm}Yr@{}}
+\toprule
+\textbf{Member} & \textbf{Primary responsibilities} & \textbf{Estimated \%}\\
+\midrule
+\memberA & Data, baseline evaluation, integration, visual-prompt baseline. & 34\%\\
+\memberB & Literature, CoOp, sensitivity, unregularized visual prompt. & 33\%\\
+\memberC & Tip-Adapter, visual-prompt implementation, regularization, reproducibility. & 33\%\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{AI Usage}
+ChatGPT was used to explain background concepts and help organize and format an initial proposal draft. The team will verify cited claims, revise the research argument, implement and run experiments, and write its own analysis and conclusions. This disclosure will be updated to reflect actual usage.
+
+% thebibliography creates the References heading automatically.
+\begin{thebibliography}{9}
+\bibitem{clip} A. Radford et al. ``Learning Transferable Visual Models From Natural Language Supervision.'' \textit{ICML}, 2021. \href{https://arxiv.org/abs/2103.00020}{arXiv:2103.00020}.
+\bibitem{coop} K. Zhou et al. ``Learning to Prompt for Vision-Language Models.'' \textit{IJCV}, 2022. \href{https://arxiv.org/abs/2109.01134}{arXiv:2109.01134}.
+\bibitem{tip} R. Zhang et al. ``Tip-Adapter: Training-free Adaption of CLIP for Few-shot Classification.'' \textit{ECCV}, 2022. \href{https://arxiv.org/abs/2207.09519}{arXiv:2207.09519}.
+\bibitem{vpt} M. Jia et al. ``Visual Prompt Tuning.'' \textit{ECCV}, 2022. \href{https://arxiv.org/abs/2203.12119}{arXiv:2203.12119}.
+\bibitem{vp} H. Bahng et al. ``Exploring Visual Prompts for Adapting Large-Scale Models.'' 2022. \href{https://arxiv.org/abs/2203.17274}{arXiv:2203.17274}.
+\end{thebibliography}
+\end{document}

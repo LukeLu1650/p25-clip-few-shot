@@ -1,0 +1,49 @@
+# Python and environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+*.egg-info/
+
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local datasets, caches, weights, and generated runs
+data/
+datasets/
+cache/
+caches/
+checkpoints/
+weights/
+runs/
+outputs/
+wandb/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.npy
+*.npz
+*.pkl
+*.zip
+*.tar
+*.tar.gz
+
+# LaTeX intermediate files
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
