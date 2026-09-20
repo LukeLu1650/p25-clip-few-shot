@@ -32,9 +32,9 @@ Replace A/B/C with agreed member names. Do not publish student IDs in this publi
 
 | Member | Primary responsibilities |
 | --- | --- |
-| A — Project Lead | Data splits, evaluation, zero-shot CLIP, ResNet-50, integration |
-| B — Research Lead | Literature review, CoOp, text-prompt sensitivity |
-| C — Engineering Lead | Tip-Adapter, visual-prompt prototype, reproducibility |
+| A — Project Lead |
+| Wangyi Lu — Research Lead |
+| C — Engineering Lead |
 
 After the visual-prompt prototype works, A leads the conventional pixel-prompt baseline, B the low-resolution unregularized variant, and C the regularized variant using shared code. Everyone contributes to repeated experiments, analysis, writing, and presentation.
 
