@@ -40,7 +40,7 @@ After the visual-prompt prototype works, A leads the conventional pixel-prompt b
 
 ## Repository contents
 
-- `P25_proposal.tex`: working English LaTeX proposal draft; review before submission. It may lag behind edits made in Overleaf.
+- `P25_proposal.tex`: working English LaTeX proposal draft.
 - `src/`: implementation workspace and guidance.
 - `configs/`: shared experiment configuration guidance.
 - `.gitignore`: excludes local data, feature caches, model weights, secrets, and temporary outputs.
