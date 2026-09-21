@@ -26,19 +26,11 @@ Compare efficient CLIP adaptation methods on **EuroSAT**, **DTD**, and **Oxford 
 - Concentrate the proposed visual-prompt extension and detailed ablations on EuroSAT.
 - Treat frozen-feature extraction and prompt training separately: visual-prompt training still requires gradients through the image encoder.
 
-## Team responsibilities
-
-Replace A/B/C with agreed member names. Do not publish student IDs in this public repository.
-
 | Member | Primary responsibilities |
 | --- | --- |
-| A — Project Lead |
+| Miller Gao — Project Lead |
 | Wangyi Lu — Research Lead |
-| C — Engineering Lead |
-
-After the visual-prompt prototype works, A leads the conventional pixel-prompt baseline, B the low-resolution unregularized variant, and C the regularized variant using shared code. Everyone contributes to repeated experiments, analysis, writing, and presentation.
-
-## Repository contents
+| Yubo Wu — Engineering Lead |
 
 - `P25_proposal.tex`: working English LaTeX proposal draft.
 - `src/`: implementation workspace and guidance.
@@ -52,8 +44,7 @@ After the visual-prompt prototype works, A leads the conventional pixel-prompt b
 3. Zhang et al. (2022), [Tip-Adapter: Training-free Adaption of CLIP for Few-shot Classification](https://arxiv.org/abs/2207.09519).
 4. Jia et al. (2022), [Visual Prompt Tuning](https://arxiv.org/abs/2203.12119).
 5. Bahng et al. (2022), [Exploring Visual Prompts for Adapting Large-Scale Models](https://arxiv.org/abs/2203.17274).
-
-Pixel-space visual prompting has already been evaluated on EuroSAT. Applying it to that dataset alone is not a new contribution.
+6. Corley et al. (2023), [Revisiting pre-trained remote sensing model benchmarks: resizing and normalization matters](https://arxiv.org/abs/2305.13456).
 
 ## AI usage
 
