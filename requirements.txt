@@ -1,0 +1,10 @@
+# Python 3.12. Install the matching CPU/CUDA torch wheels first; see setup.ps1.
+torch==2.7.1
+torchvision==0.22.1
+numpy>=1.26,<3
+Pillow>=10
+scipy>=1.15,<2
+ftfy>=6
+regex
+tqdm
+clip @ https://github.com/openai/CLIP/archive/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6.zip#sha256=c665a33987c7365078c9988fdae5699026ec75cc4424bc0d59ab2599df22229a

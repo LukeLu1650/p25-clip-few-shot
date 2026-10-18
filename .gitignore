@@ -1,4 +1,4 @@
-# Python and environments
+# Python environments and generated files
 __pycache__/
 *.py[cod]
 .venv/
@@ -9,25 +9,31 @@ venv/
 .ipynb_checkpoints/
 *.egg-info/
 
-# Secrets and local settings
+# Credentials and machine-specific settings
 .env
 .env.*
 !.env.example
+local-settings.json
+environment-check.json
+requirements.local.lock.txt
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
 
-# Local datasets, caches, weights, and generated runs
+# Local datasets, model weights, caches and runtime outputs
 data/
 datasets/
 cache/
 caches/
+.cache/
 checkpoints/
 weights/
 runs/
 outputs/
 wandb/
+tmp/
+logs/
 *.pt
 *.pth
 *.ckpt
@@ -38,6 +44,20 @@ wandb/
 *.zip
 *.tar
 *.tar.gz
+
+# Current submission is code first. Keep scientific evidence locally until reviewed.
+/results/
+/manifests/
+
+# Publish only the protocol, upstream attribution and Git instructions in this phase.
+# Other docs include generated analysis, historical setup records and course materials.
+/docs/*
+!/docs/PROTOCOL.md
+!/docs/UPSTREAM.md
+!/docs/GIT_WORKFLOW.md
+
+# Superseded environment snapshot; use requirements.experiment.lock.txt instead.
+/requirements.lock.txt
 
 # LaTeX intermediate files
 *.aux

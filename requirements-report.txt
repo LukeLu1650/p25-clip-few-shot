@@ -1,0 +1,2 @@
+# Optional scientific plotting dependencies; model training does not require these.
+matplotlib>=3.9,<4

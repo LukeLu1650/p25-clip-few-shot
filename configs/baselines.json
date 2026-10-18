@@ -1,0 +1,7 @@
+{
+  "datasets": ["eurosat", "dtd", "flowers102"],
+  "methods": ["zero_shot", "coop", "tip_adapter"],
+  "shots": [1, 2, 4, 8, 16],
+  "seeds": [1, 2, 3],
+  "options": {"epochs": 50, "n_ctx": 16, "batch_size": 32, "val_shots": 4, "split_seed": 0}
+}

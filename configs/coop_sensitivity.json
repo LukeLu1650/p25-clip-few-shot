@@ -1,0 +1,13 @@
+{
+  "datasets": ["eurosat"],
+  "methods": ["coop"],
+  "shots": [16],
+  "seeds": [1, 2, 3],
+  "options": {"epochs": 50, "batch_size": 32, "val_shots": 4, "split_seed": 0},
+  "coop_variants": [
+    {"n_ctx": 4, "ctx_init": ""},
+    {"n_ctx": 8, "ctx_init": ""},
+    {"n_ctx": 16, "ctx_init": ""},
+    {"n_ctx": 4, "ctx_init": "a photo of a"}
+  ]
+}

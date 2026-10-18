@@ -1,0 +1,9 @@
+# Upstream references and implementation notes
+
+- OpenAI CLIP: https://github.com/openai/CLIP, installed commit `d05afc436d78f1c48dc0dbf8e5980a9d471f35f6`. CLIP package/checkpoint remain external dependencies. Its MIT license remains in the installed package/source distribution. No CLIP source files are vendored here.
+- CoOp algorithm and reference implementation: https://github.com/KaiyangZhou/CoOp/blob/main/trainers/coop.py and https://arxiv.org/abs/2109.01134. Our module implements shared context with class tokens at the end. The context/text-transformer approach follows the paper. It omits upstream augmentation, warmup and extra context variants; it does not depend on Dassl or copy a full upstream trainer.
+- Tip-Adapter algorithm and reference implementation: https://github.com/gaopengcuhk/Tip-Adapter/blob/main/utils.py and https://arxiv.org/abs/2207.09519. Our module implements cache votes and validation-only parameter selection; it omits augmented-view averaging and Tip-Adapter-F. We do not copy the upstream example's test-driven selection procedure.
+- Dataset interfaces: https://docs.pytorch.org/vision/0.22/datasets.html. The tested torchvision version is 0.22.1. DTD and Flowers102 file lists currently use its `_image_files`/`_labels` attributes, so retest after changing torchvision.
+- Teammate's `make_eurosat_splits.py` was supplied directly by the user. It is preserved byte-for-byte under `src/`; confirm author attribution with the teammate in the contribution declaration.
+
+These are project implementations of published methods, not newly invented algorithms. No new repository-wide license has been assigned to teammates' work or course materials. Keep third-party license notices when later importing upstream files. Verify current upstream licenses before redistributing any additional code.

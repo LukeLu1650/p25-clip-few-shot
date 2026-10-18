@@ -1,16 +1,7 @@
-# Shared experiment configurations
+# Experiments
 
-Add validated configuration files here after the first pilot. No executable configuration is supplied yet.
+- `pilot.json`: EuroSAT, one shot/class, one seed, two CoOp epochs; integration check only.
+- `baselines.json`: 93 baseline jobs across three datasets, five budgets and three seeds.
+- `coop_sensitivity.json`: 12 EuroSAT 16-shot jobs controlling context length and initialization.
 
-Record for every experiment:
-- Method, dataset version, split protocol, and class ordering.
-- CLIP checkpoint (ViT-B/32), preprocessing, and training augmentations.
-- Shots per class: 1, 2, 4, 8, or 16.
-- Seed and shared training/validation sample manifest paths.
-- Validation-label budget and hyperparameter search budget.
-- Optimizer, learning rate, epochs, batch size, and checkpoint-selection rule where applicable.
-- Prompt template, context length, initialization, or cache settings.
-- Visual prompt resolution, amplitude bound, and regularization where applicable.
-- Hardware, dependency versions, and output location.
-
-Use repository-relative paths. Keep data and weights outside version control. Select settings using validation data only; reserve test labels for evaluation.
+Use `run.ps1 scripts/sweep.py --config configs/baselines.json --dry-run` to inspect the full plan. Extra runner flags are forwarded, for example `--device cpu` or `--download`. EuroSAT always imports the teammate's manifests (split seed 2026, full validation partition); JSON `split_seed` and `val_shots` options apply to other datasets. See `docs/PROTOCOL.md` before changing settings.

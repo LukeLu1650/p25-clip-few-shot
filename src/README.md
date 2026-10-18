@@ -1,11 +1,5 @@
-# Implementation workspace
+# Implementation
 
-Status: no training implementation yet.
+`make_eurosat_splits.py` is the unchanged teammate script. `p25/data.py` validates and imports its exact index lists, handles the documented DTD/Flowers102 protocols and exports portable manifests. `p25/methods.py` implements shared-context CoOp and original training-free Tip-Adapter.
 
-Planned components:
-- Shared dataset loading, class mappings, few-shot sample manifests, and evaluation (A).
-- Zero-shot CLIP and supervised ResNet-50 baselines (A).
-- CoOp and text-prompt sensitivity (B).
-- Original Tip-Adapter and pixel-space visual-prompt prototype (C).
-
-Use shared splits and evaluation code. After the visual-prompt prototype works, split baseline and ablation runs across all three members. Record upstream code versions and preserve their license notices. Add tested dependency versions and runnable commands when the pilot is complete.
+Run commands from the repository root through `run.ps1` or Python. See `docs/PROTOCOL.md` for differences from paper recipes and the interface requirements for teammates. ResNet-50 and image-level visual-prompt training remain to be added.

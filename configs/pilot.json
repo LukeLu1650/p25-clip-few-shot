@@ -1,0 +1,7 @@
+{
+  "datasets": ["eurosat"],
+  "methods": ["zero_shot", "coop", "tip_adapter"],
+  "shots": [1],
+  "seeds": [1],
+  "options": {"epochs": 2, "n_ctx": 4, "batch_size": 64, "output_root": "results/team-pilot-raw"}
+}
