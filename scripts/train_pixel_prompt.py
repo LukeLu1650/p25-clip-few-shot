@@ -1,15 +1,11 @@
 r"""Train a single-resolution pixel-border prompt with best-validation checkpointing.
 
-Add this file at scripts/train_pixel_prompt.py in the P25 repository.
-It imports the existing src/p25/pixel_prompt.py without modifying it.
-
 Example, run from the repository root in PowerShell:
   .\.venv\Scripts\python.exe scripts\train_pixel_prompt.py --shots 16 --seed 1 \
       --train-resolution 64 --epochs 5 --batch-size 2 --val-batch-size 8
 
-This is a validation-only DEVELOPMENT experiment. It NEVER touches the test split.
-It does NOT belong in the baseline summary.csv or the final published results.
-Choose the validation metric/schedule before comparing single/multi-res variants.
+Checkpoint selection uses validation accuracy at a single resolution, including
+epoch 0. Test images are not evaluated.
 """
 
 from __future__ import annotations
@@ -74,7 +70,7 @@ def make_transform(preprocess, resolution):
 
 
 def get_logits(model, prompt, images, text_features):
-    # The frozen CLIP image encoder MUST retain autograd during training.
+    # Retain autograd through the frozen image encoder to train the pixel prompt.
     features = F.normalize(model.encode_image(prompt(images)).float(), dim=-1)
     return model.logit_scale.exp().detach() * (features @ text_features.T)
 
@@ -109,7 +105,6 @@ def main():
     torch.backends.cuda.matmul.allow_tf32 = False
     device = "cuda"
 
-    # Load exactly the same EuroSAT manifest as the existing baselines.
     manifest = import_team_eurosat(args.data_root, args.eurosat_manifests,
                                    args.shots, args.seed)
     if len(manifest["val"]) != 2700:
@@ -235,7 +230,7 @@ def main():
         if args.max_steps and total_steps >= args.max_steps:
             break
 
-    # Prove selected weights can be reloaded; NO test evaluation here.
+    # Verify checkpoint restoration from disk using validation data.
     run_dir.mkdir(parents=True, exist_ok=False)
     torch.save({"state_dict": best_state, "config": scientific_config,
                 "best_epoch": best_epoch, "best_val_accuracy": best_score},

@@ -1,7 +1,6 @@
-"""EuroSAT controlled single- versus multi-resolution border prompt DEVELOPMENT runs.
+"""Compare single- and multi-resolution border prompts on EuroSAT validation data.
 
-Place at scripts/train_resolution_prompts.py inside p25-clip-few-shot.
-Both conditions train the SAME shared pixel-border prompt with fixed CLIP image/text
+Both conditions train a shared pixel-border prompt with frozen CLIP image/text
 encoders, matched few-shot lists, optimizer, image order and update budgets.
 Only the effective input-resolution strategy differs:
   single: each image is resized to --train-resolution before CLIP preprocessing;
@@ -9,9 +8,7 @@ Only the effective input-resolution strategy differs:
 
 The same validation-only model-selection score is used for all methods:
     mean(top1_val_at_16, top1_val_at_32, top1_val_at_64).
-Never use 24 for training/selection: reserve it for held-out resolution evaluation
-AFTER all configurations are frozen. The test split is NEVER accessed.
-This runner is for development; do not mix its output with the reviewed 93 baselines.
+The 24x24 resolution and test images are excluded from training and evaluation.
 """
 from __future__ import annotations
 
@@ -108,8 +105,7 @@ def choose_validation_subset(rows, per_class):
 
 
 def get_logits(model, prompt, images, text):
-    # Do NOT use torch.no_grad here during training: pixel prompt requires
-    # backpropagation through the frozen CLIP image encoder to the input image.
+    # Retain autograd through the frozen image encoder to train the pixel prompt.
     features = F.normalize(model.encode_image(prompt(images)).float(), dim=-1)
     return model.logit_scale.exp().detach() * (features @ text.T)
 
@@ -159,7 +155,7 @@ def main():
     if args.val_per_class == 0 and len(subset_rows) != 2700:
         raise ValueError("Full validation expected")
 
-    import clip  # OFFICIAL OpenAI CLIP, matching the team's baselines
+    import clip  # Official OpenAI CLIP, matching the baseline implementation.
     started = time.perf_counter()
     model, preprocess = clip.load("ViT-B/32", device=device, jit=False,
                                   download_root=str(args.clip_cache))
@@ -291,7 +287,7 @@ def main():
         if args.max_steps and steps >= args.max_steps:
             break
 
-    # Save, then verify by actually reloading the file (not merely an in-memory state).
+    # Verify checkpoint restoration from disk.
     run_dir.mkdir(parents=True, exist_ok=False)
     checkpoint_path = run_dir / "best_prompt.pt"
     torch.save({"state_dict": best_state, "config": config,
