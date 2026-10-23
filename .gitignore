@@ -55,6 +55,7 @@ logs/
 !/docs/PROTOCOL.md
 !/docs/UPSTREAM.md
 !/docs/GIT_WORKFLOW.md
+!/docs/BASELINE_REPRODUCTION.md
 
 # Superseded environment snapshot; use requirements.experiment.lock.txt instead.
 /requirements.lock.txt
