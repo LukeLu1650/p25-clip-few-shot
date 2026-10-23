@@ -25,7 +25,7 @@ def tip_logits(features, text, keys, values, alpha, beta, scale=100.0):
 
 @torch.no_grad()
 def tune_tip(features, labels, text, keys, values, alphas, betas):
-    """Only validation features/labels may be passed here."""
+    """Select cache hyperparameters using validation features and labels."""
     if not alphas or not betas or min(alphas) < 0 or min(betas) <= 0:
         raise ValueError("Tip grid needs nonnegative alpha and positive beta")
     best = (-1.0, None, None)
@@ -89,7 +89,7 @@ def train_coop(prompt, train, validation, epochs, batch_size, lr, seed):
     generator = torch.Generator().manual_seed(seed)
     best_score, history, selected_epoch = -1.0, [], 0
     best_context = prompt.context.detach().clone()
-    # Cached, deterministic image features are fixed. Text encoder autograd stays enabled.
+    # Image features are fixed; text-encoder gradients update the context.
     for epoch in range(1, epochs + 1):
         order = torch.randperm(len(labels), generator=generator)
         loss_sum = 0.0

@@ -97,7 +97,7 @@ def validate_manifest(manifest):
 
 
 def import_team_eurosat(root, manifest_dir, shots, seed):
-    """Use teammate index manifests exactly; detect a changed torchvision ordering."""
+    """Import shared index manifests and verify dataset ordering."""
     from torchvision.datasets import EuroSAT
     root, manifest_dir = Path(root).resolve(), Path(manifest_dir)
     split = json.loads((manifest_dir / 'eurosat_split.json').read_text(encoding='utf-8'))

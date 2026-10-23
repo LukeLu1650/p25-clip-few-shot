@@ -1,4 +1,4 @@
-"""One command for the baseline matrix or controlled CoOp sensitivity runs."""
+"""Run baseline or CoOp sensitivity experiment grids."""
 import argparse
 import itertools
 import json

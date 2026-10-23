@@ -1,14 +1,7 @@
-"""Compare single- and multi-resolution border prompts on EuroSAT validation data.
+"""Train single- or multi-resolution EuroSAT border prompts.
 
-Both conditions train a shared pixel-border prompt with frozen CLIP image/text
-encoders, matched few-shot lists, optimizer, image order and update budgets.
-Only the effective input-resolution strategy differs:
-  single: each image is resized to --train-resolution before CLIP preprocessing;
-  multi:  each training image independently samples 16, 32, or 64 (uniform).
-
-The same validation-only model-selection score is used for all methods:
-    mean(top1_val_at_16, top1_val_at_32, top1_val_at_64).
-The 24x24 resolution and test images are excluded from training and evaluation.
+Select checkpoints by mean validation accuracy at 16, 32, and 64 pixels.
+Test images and resolution 24 are excluded.
 """
 from __future__ import annotations
 
@@ -75,11 +68,7 @@ def parse_args():
 
 
 def make_transform(preprocess, *, mode, resolution=None, rng=None):
-    """The effective resize happens BEFORE the same official CLIP preprocessing.
-
-    Using a local RNG in mode=multi makes sampling reproducible and independent
-    of Python global random state. num_workers=0 keeps sampling order stable.
-    """
+    """Resize to an effective resolution before CLIP preprocessing."""
     if mode not in ("single", "multi"):
         raise ValueError("mode must be single or multi")
     if mode == "single" and resolution not in TRAIN_RESOLUTIONS:
@@ -105,7 +94,7 @@ def choose_validation_subset(rows, per_class):
 
 
 def get_logits(model, prompt, images, text):
-    # Retain autograd through the frozen image encoder to train the pixel prompt.
+    # Keep the gradient path from the frozen encoder to the prompt.
     features = F.normalize(model.encode_image(prompt(images)).float(), dim=-1)
     return model.logit_scale.exp().detach() * (features @ text.T)
 
@@ -139,7 +128,7 @@ def state_on_cpu(module):
 def main():
     args = parse_args()
     if not torch.cuda.is_available():
-        raise RuntimeError("CUDA unavailable: expected GPU-enabled local environment")
+        raise RuntimeError("CUDA is required for pixel-prompt training.")
     random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
@@ -165,7 +154,7 @@ def main():
                                max_delta=args.max_delta).to(device)
     optimizer = torch.optim.AdamW([prompt.raw_delta], lr=args.lr, weight_decay=0.0)
 
-    # Identical image order in all conditions; only transform policy differs.
+    # Keep image order fixed across resolution strategies.
     train_rng = random.Random(91800 + args.seed)
     train_transform = make_transform(
         preprocess, mode=args.mode, resolution=args.train_resolution, rng=train_rng)
@@ -287,7 +276,6 @@ def main():
         if args.max_steps and steps >= args.max_steps:
             break
 
-    # Verify checkpoint restoration from disk.
     run_dir.mkdir(parents=True, exist_ok=False)
     checkpoint_path = run_dir / "best_prompt.pt"
     torch.save({"state_dict": best_state, "config": config,

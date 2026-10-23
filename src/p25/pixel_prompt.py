@@ -1,8 +1,6 @@
-"""Trainable additive pixel-space border prompt for OpenAI CLIP.
+"""Shared RGB border prompt for CLIP-normalized image tensors.
 
-Inputs and outputs are CLIP-normalized images (N, 3, 224, 224).
-The perturbation is learned in RGB [0, 1] space on an 8-pixel border by default.
-Only the prompt parameters require gradients; the CLIP backbone remains frozen.
+The bounded perturbation is applied in RGB space before normalization.
 """
 
 import torch
@@ -24,8 +22,6 @@ class PixelBorderPrompt(nn.Module):
         self.border_width = border_width
         self.max_delta = float(max_delta)
 
-        # Same 3-channel spatial prompt is shared by every training image.
-        # tanh() smoothly limits each RGB perturbation to +/-max_delta.
         self.raw_delta = nn.Parameter(torch.zeros(1, 3, image_size, image_size))
         mask = torch.ones(1, 1, image_size, image_size)
         mask[:, :, border_width:-border_width, border_width:-border_width] = 0
@@ -43,5 +39,5 @@ class PixelBorderPrompt(nn.Module):
         return (prompted_rgb - self.mean) / self.std
 
     def effective_trainable_parameters(self):
-        # Count the border pixels, rather than the masked-out interior tensor.
+        # Exclude masked interior elements from the effective parameter count.
         return int(self.mask.sum().item()) * 3

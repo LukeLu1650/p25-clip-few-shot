@@ -1,11 +1,6 @@
-r"""Train a single-resolution pixel-border prompt with best-validation checkpointing.
+"""Train a single-resolution border prompt with validation checkpoint selection.
 
-Example, run from the repository root in PowerShell:
-  .\.venv\Scripts\python.exe scripts\train_pixel_prompt.py --shots 16 --seed 1 \
-      --train-resolution 64 --epochs 5 --batch-size 2 --val-batch-size 8
-
-Checkpoint selection uses validation accuracy at a single resolution, including
-epoch 0. Test images are not evaluated.
+Epoch 0 is eligible; test images are excluded.
 """
 
 from __future__ import annotations
@@ -20,7 +15,7 @@ import sys
 import time
 from pathlib import Path
 
-# Match the project's existing reproducibility settings before importing torch.
+# Configure deterministic CUDA operations before importing torch.
 os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -63,14 +58,13 @@ def parse_args():
 
 def make_transform(preprocess, resolution):
     def transform(image):
-        # Control effective resolution before the official CLIP preprocessing.
         image = image.resize((resolution, resolution), Image.Resampling.BICUBIC)
         return preprocess(image)
     return transform
 
 
 def get_logits(model, prompt, images, text_features):
-    # Retain autograd through the frozen image encoder to train the pixel prompt.
+    # Keep the gradient path from the frozen encoder to the prompt.
     features = F.normalize(model.encode_image(prompt(images)).float(), dim=-1)
     return model.logit_scale.exp().detach() * (features @ text_features.T)
 
@@ -95,7 +89,7 @@ def cpu_checkpoint(prompt):
 def main():
     args = parse_args()
     if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is unavailable; this runner was designed for the local RTX 4060 Ti")
+        raise RuntimeError("CUDA is required for pixel-prompt training.")
 
     random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -208,7 +202,6 @@ def main():
         if updates_in_epoch == 0:
             break
 
-        # Full validation is used only for checkpoint selection, not for gradients.
         torch.cuda.synchronize()
         tick = time.perf_counter()
         accuracy = evaluate_validation(model, prompt, validation_loader, text_features, device)
@@ -230,7 +223,6 @@ def main():
         if args.max_steps and total_steps >= args.max_steps:
             break
 
-    # Verify checkpoint restoration from disk using validation data.
     run_dir.mkdir(parents=True, exist_ok=False)
     torch.save({"state_dict": best_state, "config": scientific_config,
                 "best_epoch": best_epoch, "best_val_accuracy": best_score},

@@ -1,4 +1,4 @@
-"""Check GPU computation and official CLIP inference; not an accuracy benchmark."""
+"""Verify CUDA computation and CLIP image/text inference."""
 
 import argparse
 import hashlib
@@ -35,7 +35,7 @@ def main():
     gpu = torch.cuda.get_device_name(0) if device == "cuda" else None
     print(f"GPU: {gpu}", flush=True)
 
-    # Exercise an actual GPU kernel and backward pass, not just GPU detection.
+    # Check device kernels and autograd.
     matrix = torch.randn(64, 64, device=device, requires_grad=True)
     value = (matrix @ matrix.T).square().mean()
     value.backward()
